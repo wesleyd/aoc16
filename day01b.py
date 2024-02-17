@@ -50,7 +50,6 @@ def walk(instructions, c='N', p=Point(0, 0)):
             if p in visited:
                 return p
             visited.add(p)
-
 assert dist(walk(parse('R8, R4, R4, R8'))) == 4
 
 real_input = open('inputs/day01.input.txt').read()

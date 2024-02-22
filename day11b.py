@@ -37,15 +37,20 @@ class Facility:
             for chip in chips:
                 floor.add(chip[0].upper() + 'M')
     def __hash__(self):
-        ff = [tuple(sorted(f)) for f in self.floors]
-        return hash((self.elevator, tuple(ff)))
+        ff = [set(), set(), set(), set()]
+        key = {}
+        for i, floor in enumerate(self.floors):
+            for item in sorted(floor):
+                idx = -1
+                if item[0] in key:
+                    idx = key[item[0]]
+                else:
+                    idx = len(key)
+                    key[item[0]] = idx
+                ff[i].add(str(idx) + item[1])
+        return hash((self.elevator, tuple([tuple(sorted(f)) for f in ff])))
     def __eq__(self, other):
-        if self.elevator != other.elevator:
-            return False
-        for i in range(3):
-            if self.floors[i] != other.floors[i]:
-                return False
-        return True
+        return self.__hash__() == other.__hash__()
     def __str__(self):
         lines = []
         for i, floor in enumerate(self.floors):

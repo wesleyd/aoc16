@@ -37,15 +37,20 @@ class Facility:
             for chip in chips:
                 floor.add(chip[0].upper() + 'M')
     def __hash__(self):
-        ff = [tuple(sorted(f)) for f in self.floors]
-        return hash((self.elevator, tuple(ff)))
+        ff = [set(), set(), set(), set()]
+        key = {}
+        for i, floor in enumerate(self.floors):
+            for item in sorted(floor):
+                idx = -1
+                if item[0] in key:
+                    idx = key[item[0]]
+                else:
+                    idx = len(key)
+                    key[item[0]] = idx
+                ff[i].add(str(idx) + item[1])
+        return hash((self.elevator, tuple([tuple(sorted(f)) for f in ff])))
     def __eq__(self, other):
-        if self.elevator != other.elevator:
-            return False
-        for i in range(3):
-            if self.floors[i] != other.floors[i]:
-                return False
-        return True
+        return self.__hash__() == other.__hash__()
     def __str__(self):
         lines = []
         for i, floor in enumerate(self.floors):
@@ -110,29 +115,12 @@ def moves(facility):
             continue
         for n in [1, 2]:
             for items in itertools.combinations(facility.floors[facility.elevator], n):
-                #print(f'Move {n} items {items} to {e2}?')
                 g = moved(facility, e2, items)
                 if g:
-                    #print('  Yes')
                     yield g
-                else:
-                    #print('  No')
-                    pass
 
 def win(facility):
     return not facility.floors[0] and not facility.floors[1] and not facility.floors[2]
-
-# f = Facility('')
-# f.elevator = 3
-# f.floors[3] = set(['HG', 'HM', 'LG', 'LM'])
-# print(win(f))
-
-# f = Facility(example_input)
-# print(f)
-# for g in moves(f):
-#     print(g)
-
-# f = Facility
 
 def play(inp):
     f = Facility(inp)
@@ -145,9 +133,6 @@ def play(inp):
         if dist > furthest:
             print(dist)
             furthest = dist
-        #print(dist)
-        #print(f)
-        #print()
         if win(f):
             return dist
         for f2 in moves(f):
@@ -156,36 +141,6 @@ def play(inp):
             future[f2] = dist + 1
             prev[f2] = f            
 print(play(example_input))
-
-# f = Facility(example_input)
-# while True:
-#     print('Currently:')
-#     print(f)
-#     print()
-#     print('Moves:')
-#     mm = list(moves(f))
-#     for i, f2 in enumerate(mm):
-#         print(f'#{i}')
-#         print(f2)
-#         print()
-#     j = -1
-#     while j < 0 or len(mm) <= j:
-#         j = int(input(f'0-{len(mm)-1}? '))
-#     f = mm[j]
-    
-# f = Facility('')
-# f.elevator = 3
-# f.floors[3] = set(['HG', 'LG', 'LM'])
-# f.floors[2] = set(['HM'])
-# print(f.__hash__())
-# dd = set()
-# dd.add(f)
-# g = Facility('')
-# g.elevator = 3
-# g.floors[3] = set(['HG', 'LG', 'LM'])
-# g.floors[2] = set(['HM'])
-# print(g.__hash__())
-# print(g in dd)
 
 real_input = open('inputs/day11.input.txt').read()
 print(play(real_input)) # => 37
